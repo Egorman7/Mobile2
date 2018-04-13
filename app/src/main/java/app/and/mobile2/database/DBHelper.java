@@ -1,6 +1,8 @@
 package app.and.mobile2.database;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -45,5 +47,63 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
+    }
+
+    public static String register(Context context, String login, String pass){
+        SQLiteDatabase database = getInstance(context).getWritableDatabase();
+        Cursor cursor = database.rawQuery("select * from " + TABLE_USERS, null);
+        boolean result = true;
+        String message = "User already exist's!";
+        if(cursor.moveToFirst()){
+            do{
+                if(cursor.getString(cursor.getColumnIndexOrThrow(USERS_NAME)).equals(login)) {
+                    result = false; break;
+                }
+            }while (cursor.moveToNext());
+        }
+        if(!result) return message;
+        ContentValues cv = new ContentValues();
+        cv.put(USERS_NAME, login);
+        cv.put(USERS_PASS, pass);
+        if(database.insert(TABLE_USERS, null, cv)!=-1) message = "Registered!";
+        else message = "Error!";
+        cursor.close();
+        database.close();
+        return message;
+    }
+
+    public static int login(Context context, String login, String pass){
+        SQLiteDatabase database = getInstance(context).getReadableDatabase();
+        Cursor cursor = database.rawQuery("select * from " + TABLE_USERS + " where " + USERS_NAME + " = '" + login + "'", null);
+        int result;
+        if(cursor.moveToFirst()){
+            if(cursor.getString(cursor.getColumnIndexOrThrow(USERS_PASS)).equals(pass)) result = cursor.getInt(cursor.getColumnIndexOrThrow(USERS_ID));
+            else result = -2;
+        } else result = -1;
+        cursor.close();
+        database.close();
+        return result;
+    }
+
+    public static boolean addToList(Context context, int user_id, String url, boolean approved){
+        SQLiteDatabase database = getInstance(context).getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        boolean result = false;
+        cv.put(LIST_USER, user_id);
+        cv.put(LIST_URL, url);
+        cv.put(LIST_APPROVED, approved);
+        if(database.insert(TABLE_LIST, null, cv)!=-1) result = true;
+        database.close();
+        return result;
+    }
+
+    public static boolean isInList(Context context, int user_id, String url){
+        SQLiteDatabase database = getInstance(context).getReadableDatabase();
+        Cursor cursor = database.rawQuery("select * from " + TABLE_LIST + " where " + LIST_USER + " = " + user_id + " and " + LIST_URL + " = '" + url + "'", null);
+        boolean result = false;
+        if(cursor.moveToFirst()) result = true;
+        cursor.close();
+        database.close();
+        return result;
     }
 }
