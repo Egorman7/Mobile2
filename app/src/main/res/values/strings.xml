@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Mobile2</string>
+    <string name="title_activity_reddit">RedditActivity</string>
+    <string name="title_activity_list">List</string>
 </resources>

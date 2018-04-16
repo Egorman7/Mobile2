@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+
+import app.and.mobile2.models.ListItemModel;
+
 public class DBHelper extends SQLiteOpenHelper {
     private static DBHelper instance = null;
     private Context context;
@@ -13,7 +17,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "maobile2_database";
     private static final String TABLE_USERS="users", TABLE_LIST="list";
     private static final String USERS_ID = "_id", USERS_NAME="username", USERS_PASS="password";
-    private static final String LIST_ID="_id", LIST_USER="user", LIST_URL="url", LIST_APPROVED="approved";
+    public static final String LIST_ID="_id", LIST_USER="user", LIST_URL="url", LIST_APPROVED="approved";
 
 
     private static final String CREATE_USERS_TABLE = "create table " +
@@ -53,7 +57,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase database = getInstance(context).getWritableDatabase();
         Cursor cursor = database.rawQuery("select * from " + TABLE_USERS, null);
         boolean result = true;
-        String message = "User already exist's!";
+        String message = "Такой пользователь существует!";
         if(cursor.moveToFirst()){
             do{
                 if(cursor.getString(cursor.getColumnIndexOrThrow(USERS_NAME)).equals(login)) {
@@ -65,8 +69,8 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put(USERS_NAME, login);
         cv.put(USERS_PASS, pass);
-        if(database.insert(TABLE_USERS, null, cv)!=-1) message = "Registered!";
-        else message = "Error!";
+        if(database.insert(TABLE_USERS, null, cv)!=-1) message = "Регистрация успешна!";
+        else message = "Ошибка базы данных!";
         cursor.close();
         database.close();
         return message;
@@ -106,4 +110,17 @@ public class DBHelper extends SQLiteOpenHelper {
         database.close();
         return result;
     }
+
+    public static Cursor getListCursor(Context context, int user_id){
+        SQLiteDatabase database = getInstance(context).getReadableDatabase();
+        Cursor cursor = database.rawQuery("select * from " + TABLE_LIST + " where " + LIST_USER + " = " + user_id + " order by " + LIST_ID + " desc", null);
+        return cursor;
+    }
+
+/*
+    public static ArrayList<ListItemModel> getListData(Context context, int user_id){
+        SQLiteDatabase database = getInstance(context).getReadableDatabase();
+        Cursor cursor =
+    }
+    */
 }
