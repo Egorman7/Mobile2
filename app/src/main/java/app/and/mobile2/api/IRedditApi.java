@@ -1,7 +1,5 @@
 package app.and.mobile2.api;
 
-import org.json.JSONObject;
-
 import app.and.mobile2.models.RedditDataModel;
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -6,10 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.util.ArrayList;
-
-import app.and.mobile2.models.ListItemModel;
-
 public class DBHelper extends SQLiteOpenHelper {
     private static DBHelper instance = null;
     private Context context;
@@ -111,16 +107,10 @@ public class DBHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public static Cursor getListCursor(Context context, int user_id){
+    public static Cursor getListCursor(Context context, int user_id, boolean approved){
+        String app = approved ? "1" : "0";
         SQLiteDatabase database = getInstance(context).getReadableDatabase();
-        Cursor cursor = database.rawQuery("select * from " + TABLE_LIST + " where " + LIST_USER + " = " + user_id + " order by " + LIST_ID + " desc", null);
+        Cursor cursor = database.rawQuery("select * from " + TABLE_LIST + " where " + LIST_USER + " = " + user_id + " and " + LIST_APPROVED + " = " + app +" order by " + LIST_ID + " desc", null);
         return cursor;
     }
-
-/*
-    public static ArrayList<ListItemModel> getListData(Context context, int user_id){
-        SQLiteDatabase database = getInstance(context).getReadableDatabase();
-        Cursor cursor =
-    }
-    */
 }

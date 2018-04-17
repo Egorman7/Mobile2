@@ -7,14 +7,11 @@ public class PostModel {
     private String thumbnail;
     @SerializedName("is_video")
     private boolean is_video;
-    @SerializedName("subreddit_id")
-    String subreddit_id;
 
 
-    public PostModel(String thumbnail, boolean is_video, String subreddit_id) {
+    public PostModel(String thumbnail, boolean is_video) {
         this.thumbnail = thumbnail;
         this.is_video = is_video;
-        this.subreddit_id = subreddit_id;
     }
 
     public String getThumbnail() {
@@ -23,9 +20,5 @@ public class PostModel {
 
     public boolean isIs_video() {
         return is_video;
-    }
-
-    public String getSubreddit_id() {
-        return subreddit_id;
     }
 }

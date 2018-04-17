@@ -1,10 +1,7 @@
 package app.and.mobile2;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,12 +10,8 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -62,6 +55,7 @@ public class RedditActivity extends AppCompatActivity {
         mLogin.setText(getIntent().getStringExtra("username"));
         mTitle.setText("Puppy Lover");
         UserId = getIntent().getIntExtra("user_id",-1);
+        // Загрузка данных
         loadData();
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -71,20 +65,13 @@ public class RedditActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                switch (direction){
-                    case ItemTouchHelper.LEFT:
-                        Log.d("SWIPE", "Swipe Left!");
-                        DBHelper.addToList(getApplicationContext(), UserId, mAdapter.getList().get(viewHolder.getAdapterPosition()).getUrl(),false);
-                        mAdapter.getList().remove(viewHolder.getAdapterPosition());
-                        mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-                        break;
-                    case ItemTouchHelper.RIGHT:
-                        Log.d("SWIPE", "Swipe Right!");
-                        DBHelper.addToList(getApplicationContext(), UserId, mAdapter.getList().get(viewHolder.getAdapterPosition()).getUrl(),true);
-                        mAdapter.getList().remove(viewHolder.getAdapterPosition());
-                        mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-                        break;
-                }
+                // Запись в БД поста и удаление из общего списка
+                boolean liked = direction == ItemTouchHelper.RIGHT;
+                DBHelper.addToList(getApplicationContext(), UserId, mAdapter.getList().get(viewHolder.getAdapterPosition()).getUrl(),liked);
+                mAdapter.getList().remove(viewHolder.getAdapterPosition());
+                mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+                Toast.makeText(getApplicationContext(), liked ? "Понравилось" : "Не понравилось", Toast.LENGTH_SHORT).show();
+                // Если осталось мало постов, то подгрузка данных
                 if(mAdapter.getList().size()<=5) loadData();
             }
         };
@@ -96,36 +83,39 @@ public class RedditActivity extends AppCompatActivity {
             Callback<RedditDataModel> callback = new Callback<RedditDataModel>() {
                 @Override
                 public void onResponse(Call<RedditDataModel> call, Response<RedditDataModel> response) {
+                    if(response.body()==null){
+                        Toast.makeText(getApplicationContext(), "Ошибка загрузки данных", Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     ArrayList<RedditDataModel.Data.Children> posts = response.body().getData().getChildren();
                     ArrayList<ListItemModel> data = new ArrayList<>();
                     for(int i=0; i<posts.size(); i++){
                         if(!posts.get(i).getData().isIs_video() && !DBHelper.isInList(getApplicationContext(), UserId, posts.get(i).getData().getThumbnail())){
                             data.add(new ListItemModel(posts.get(i).getData().getThumbnail(),false));
-                            Log.d("DATA_LIST", data.get(data.size()-1).getUrl());
                         }
                         after = response.body().getData().getAfter();
                     }
                     LinearLayoutManager llm = new LinearLayoutManager(RedditActivity.this);
                     llm.setOrientation(LinearLayoutManager.VERTICAL);
                     mRecyclerView.setLayoutManager(llm);
+                    // Проверка для подгрузки данных в список
                     if(mAdapter!=null && mAdapter.getList()!=null){
                         mAdapter.getList().addAll(data);
-                       // mAdapter.notify();
                     } else {
                         mAdapter = new RedditListAdapter(data, getApplicationContext(), UserId);
                         mRecyclerView.setAdapter(mAdapter);
                     }
+                    // если загрузило мало, то снова подгружаем данные
                     if(mAdapter.getList().size()<=5) RedditApi.getInstance().getPuppiesModel(after,25).enqueue(this);
-                    //after = mAdapter.getList().get(mAdapter.getList().size()-1)
-                    //Toast.makeText(getApplicationContext(), "Data loaded!", Toast.LENGTH_SHORT).show();
+                    else {Toast.makeText(getApplicationContext(), "Данные загружены!", Toast.LENGTH_SHORT).show();}
                 }
 
                 @Override
                 public void onFailure(Call<RedditDataModel> call, Throwable t) {
-                    Log.e("DATA_LOAD", t.getMessage());
-                    //Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Ошибка загрузки данных!", Toast.LENGTH_LONG).show();
                 }
             };
+            Toast.makeText(getApplicationContext(), "Загрузка данных...", Toast.LENGTH_LONG).show();
             RedditApi.getInstance().getPuppiesModel(after,25).enqueue(callback);
         } catch (Exception ex) {ex.printStackTrace();}
     }

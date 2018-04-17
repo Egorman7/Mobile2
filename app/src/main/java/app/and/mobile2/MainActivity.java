@@ -2,12 +2,11 @@ package app.and.mobile2;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
-import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //super.onActivityResult(requestCode, resultCode, data);
         finish();
+        System.exit(0);
     }
 
     private void initializeView(){
@@ -46,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void initializeListeners(){
+        // Вход в приложение
         mSignIn.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("RestrictedApi")
             @Override
@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 if(id==-1) Toast.makeText(getApplicationContext(),"Пользователь не существует!", Toast.LENGTH_SHORT).show();
                 else if(id==-2) Toast.makeText(getApplicationContext(), "Неверный пароль!", Toast.LENGTH_SHORT).show();
                 else {
+                    // Запуск активити списка картинок с реддита
                     Intent intent = new Intent(MainActivity.this, RedditActivity.class);
                     intent.putExtra("user_id", id);
                     intent.putExtra("username", login);
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        // Регистрация в приложении
         mRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 final EditText dLogin = v.findViewById(R.id.dialog_reg_input_login);
                 final EditText dPass = v.findViewById(R.id.dialog_reg_input_pass);
                 final EditText dPass2 = v.findViewById(R.id.dialog_reg_input_pass2);
+                // Диалог для регистрации
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Регистрация")
                         .setView(v)

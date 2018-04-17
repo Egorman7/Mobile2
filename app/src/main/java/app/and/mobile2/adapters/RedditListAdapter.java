@@ -1,11 +1,8 @@
 package app.and.mobile2.adapters;
 
-import android.animation.Animator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +13,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import app.and.mobile2.R;
-import app.and.mobile2.database.DBHelper;
 import app.and.mobile2.models.ListItemModel;
 
 public class RedditListAdapter extends RecyclerView.Adapter<RedditListAdapter.RedditViewHolder>{
